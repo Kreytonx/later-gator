@@ -19,15 +19,75 @@
 // get refs to the input and output elements in the page
 const input = document.getElementById("target");
 const output = document.querySelector("output");
+const list = document.getElementById("available-targets");
 
 // when the input has focus and enter is pressed, invoke the function named later
+// input.addEventListener("keydown", (ev) => {
+//   console.debug("keydown", ev.key);
+//   if (ev.key === "Enter") {
+//     console.log("Enter detected. current value:", input.value);
+//     // TODO use the provided later() function here
+//     later(input.value, setOutput)
+//   }
+// });
+
 input.addEventListener("keydown", (ev) => {
-  console.debug("keydown", ev.key);
-  if (ev.key === "Enter") {
-    console.log("Enter detected. current value:", input.value);
-    // TODO use the provided later() function here
+  if(ev.key === "Enter"){
+    console.log("Enter detected. Current input value:", input.value);
+
+    //clears the existing list to avoid duplicate entries
+    list.innerHTML = '';
+
+    const query = input.value;
+
+    //retrieves all targets and filter manually
+    options((targets) => {
+      console.log("Matching targets based on query:", targets);
+
+      // If there are no matching targets, get a random valediction
+      if(targets.length === 0){
+        later(query, (result) => {
+          //creates a button with the random valediction as text
+          const listItem = document.createElement("li");
+          const button = document.createElement("button");
+          button.textContent = result.valediction;
+
+          //when the button is clicked, update the output with the random valediction
+          button.addEventListener("click", () => {
+            setOutput(result);
+          });
+
+          listItem.appendChild(button);
+          list.appendChild(listItem);
+        });
+      }
+      //else there is an input
+      else{
+        addOptions(targets);
+      }
+    }, query);
   }
 });
+
+//adds each option as a button in a list item
+const addOptions = (targets) => {
+  console.log("addOptions called with targets:", targets);
+
+  targets.forEach(target => {
+    const listItem = document.createElement("li");
+    const button = document.createElement("button");
+    button.textContent = target;
+
+    // When the button is clicked, request the valediction with later()
+    button.addEventListener("click", () => {
+      console.log("Button clicked for target:", target);
+      later(target, setOutput);
+    });
+
+    listItem.appendChild(button);
+    list.appendChild(listItem);
+  });
+};
 
 // when you have the result from this function, update(replace) the content of the output element with the result formatted as:
 // "RESULT, TARGET" // where the all caps are placeholders for the corresponding values
@@ -37,9 +97,10 @@ input.addEventListener("keydown", (ev) => {
 // see you later, alligator
 
 //
-const setOutput = (target, valediction) => {
-  console.log("setOutput", target, valediction);
+const setOutput = (result) => {
+  console.log("setOutput", result);
   // TODO see comments just above 🙄
+  output.textContent = `${result.valediction}, ${result.target}`;
 };
 
 // for Part 2
